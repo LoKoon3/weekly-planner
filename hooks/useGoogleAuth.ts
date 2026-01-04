@@ -101,28 +101,40 @@ export const useGoogleAuth = () => {
 
   // GIS (Google Identity Services) 초기화
   useEffect(() => {
+    // CLIENT_ID가 없으면 GIS 초기화 건너뛰기
+    if (!CLIENT_ID) {
+      console.log('Google Client ID가 설정되지 않음 - Google 인증 비활성화');
+      setIsGisLoaded(true); // 로드 완료로 처리 (비활성화 상태)
+      return;
+    }
+
     const initializeGis = () => {
       if (window.google?.accounts?.oauth2) {
-        const client = window.google.accounts.oauth2.initTokenClient({
-          client_id: CLIENT_ID,
-          scope: SCOPES,
-          callback: (response: TokenResponse) => {
-            if (response.error) {
-              console.error('OAuth 에러:', response.error);
-              setError('로그인에 실패했습니다.');
-              setIsLoading(false);
-              return;
-            }
+        try {
+          const client = window.google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: (response: TokenResponse) => {
+              if (response.error) {
+                console.error('OAuth 에러:', response.error);
+                setError('로그인에 실패했습니다.');
+                setIsLoading(false);
+                return;
+              }
 
-            // 토큰 저장 및 gapi에 설정
-            window.gapi.client.setToken({ access_token: response.access_token });
-            setGoogleConnected(true, response.access_token);
-            setIsLoading(false);
-            setError(null);
-          },
-        });
-        setTokenClient(client);
-        setIsGisLoaded(true);
+              // 토큰 저장 및 gapi에 설정
+              window.gapi.client.setToken({ access_token: response.access_token });
+              setGoogleConnected(true, response.access_token);
+              setIsLoading(false);
+              setError(null);
+            },
+          });
+          setTokenClient(client);
+          setIsGisLoaded(true);
+        } catch (err) {
+          console.error('GIS 초기화 실패:', err);
+          setIsGisLoaded(true); // 에러 시에도 로드 완료 처리
+        }
       } else {
         // GIS가 아직 로드되지 않았으면 재시도
         setTimeout(initializeGis, 100);
