@@ -4,6 +4,7 @@ import { useStore } from './stores/useStore';
 import { useGoogleAuth } from './hooks/useGoogleAuth';
 import WeeklyCalendar from './components/Calendar/WeeklyCalendar';
 import DailyTimelineView from './components/Calendar/DailyTimelineView';
+import YearlyGoalBanner from './components/Goals/YearlyGoalBanner';
 import GoalPanel from './components/Goals/GoalPanel';
 import TaskModal from './components/Task/TaskModal';
 import WeeklyReviewModal from './components/Review/WeeklyReviewModal';
@@ -156,8 +157,13 @@ const App: React.FC = () => {
             </div>
           </header>
 
+          {/* Yearly Goal Banner */}
+          <div className="px-6 pt-4">
+            <YearlyGoalBanner />
+          </div>
+
           {/* Calendar View */}
-          <div className="flex-1 p-6 overflow-auto relative">
+          <div className="flex-1 p-6 pt-4 overflow-auto relative">
             {selectedDayForDetail ? (
               <DailyTimelineView
                 selectedDate={selectedDayForDetail}
