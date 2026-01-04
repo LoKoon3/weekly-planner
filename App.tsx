@@ -6,9 +6,10 @@ import WeeklyCalendar from './components/Calendar/WeeklyCalendar';
 import DailyTimelineView from './components/Calendar/DailyTimelineView';
 import YearlyGoalBanner from './components/Goals/YearlyGoalBanner';
 import GoalPanel from './components/Goals/GoalPanel';
+import MonthlyGoalSection from './components/Goals/MonthlyGoalSection';
 import TaskModal from './components/Task/TaskModal';
 import WeeklyReviewModal from './components/Review/WeeklyReviewModal';
-import { getWeekRange, getWeekNumber, formatDate } from './utils/dateUtils';
+import { getWeekRange, getWeekNumber, formatDate, getHighestMonth } from './utils/dateUtils';
 import { Task } from './types';
 
 const App: React.FC = () => {
@@ -31,6 +32,12 @@ const App: React.FC = () => {
   const weekDays = useMemo(() => getWeekRange(currentDate), [currentDate]);
   const weekNum = useMemo(() => getWeekNumber(currentDate), [currentDate]);
   const year = currentDate.getFullYear();
+
+  // 주차에서 가장 높은 월 계산 (월간 목표 표시용)
+  const { month: targetMonth, year: targetYear } = useMemo(
+    () => getHighestMonth(weekDays),
+    [weekDays]
+  );
 
   const currentWeekTasks = useMemo(() => {
     const dates = weekDays.map(d => formatDate(d));
@@ -89,7 +96,7 @@ const App: React.FC = () => {
             <h1 className="text-xl font-black tracking-tight">주간 플래너</h1>
           </div>
 
-          <GoalPanel />
+          <GoalPanel targetMonth={targetMonth} targetYear={targetYear} />
 
           <div className="mt-auto space-y-4">
             <button
@@ -144,7 +151,7 @@ const App: React.FC = () => {
 
             {/* Goal Panel */}
             <div className="flex-1 overflow-y-auto">
-              <GoalPanel />
+              <GoalPanel targetMonth={targetMonth} targetYear={targetYear} />
             </div>
 
             {/* Footer */}
@@ -268,21 +275,32 @@ const App: React.FC = () => {
           </div>
 
           {/* Calendar View */}
-          <div className="flex-1 p-3 sm:p-6 pt-3 sm:pt-4 overflow-auto relative">
-            {selectedDayForDetail ? (
-              <DailyTimelineView
-                selectedDate={selectedDayForDetail}
-                onBack={handleBackToWeekly}
+          <div className="flex-1 flex flex-col p-3 sm:p-6 pt-3 sm:pt-4 overflow-auto relative">
+            {/* Calendar */}
+            <div className="flex-shrink-0">
+              {selectedDayForDetail ? (
+                <DailyTimelineView
+                  selectedDate={selectedDayForDetail}
+                  onBack={handleBackToWeekly}
+                />
+              ) : (
+                <WeeklyCalendar
+                  weekDays={weekDays}
+                  onTaskClick={handleTaskClick}
+                  onEmptySlotClick={handleEmptySlotClick}
+                  onDateClick={handleDateClick}
+                />
+              )}
+            </div>
+
+            {/* Mobile: Monthly Goal Section (below calendar) */}
+            <div className="lg:hidden mt-4 pb-16">
+              <MonthlyGoalSection
+                targetMonth={targetMonth}
+                targetYear={targetYear}
               />
-            ) : (
-              <WeeklyCalendar
-                weekDays={weekDays}
-                onTaskClick={handleTaskClick}
-                onEmptySlotClick={handleEmptySlotClick}
-                onDateClick={handleDateClick}
-              />
-            )}
-            
+            </div>
+
             {/* FAB */}
             <button
               onClick={() => {
@@ -290,7 +308,7 @@ const App: React.FC = () => {
                 setSelectedDate(formatDate(new Date()));
                 setIsTaskModalOpen(true);
               }}
-              className="absolute bottom-4 right-4 sm:bottom-10 sm:right-10 w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-blue-400/50 hover:scale-110 active:scale-95 transition-all z-40"
+              className="fixed bottom-4 right-4 sm:absolute sm:bottom-10 sm:right-10 w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-blue-400/50 hover:scale-110 active:scale-95 transition-all z-40"
             >
               <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
             </button>

@@ -2,20 +2,26 @@
 import React, { useState } from 'react';
 import { useStore } from '../../stores/useStore';
 
-const GoalPanel: React.FC = () => {
+interface GoalPanelProps {
+  targetMonth?: number;
+  targetYear?: number;
+}
+
+const GoalPanel: React.FC<GoalPanelProps> = ({ targetMonth, targetYear }) => {
   const { goals, addGoal, deleteGoal } = useStore();
   const [newGoal, setNewGoal] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1;
+  // props가 제공되면 해당 월 사용, 아니면 현재 월 사용
+  const displayMonth = targetMonth ?? (new Date().getMonth() + 1);
+  const displayYear = targetYear ?? new Date().getFullYear();
 
   const monthNames = ['', '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
 
   const monthlyGoals = goals.filter(g =>
     g.type === 'monthly' &&
-    g.year === currentYear &&
-    g.month === currentMonth
+    g.year === displayYear &&
+    g.month === displayMonth
   );
 
   const handleAddGoal = (e: React.FormEvent) => {
@@ -24,8 +30,8 @@ const GoalPanel: React.FC = () => {
 
     addGoal({
       type: 'monthly',
-      year: currentYear,
-      month: currentMonth,
+      year: displayYear,
+      month: displayMonth,
       content: newGoal.trim(),
     });
 
@@ -49,7 +55,7 @@ const GoalPanel: React.FC = () => {
             </svg>
           </div>
           <div>
-            <h3 className="text-sm font-bold dark:text-white">{monthNames[currentMonth]} 목표</h3>
+            <h3 className="text-sm font-bold dark:text-white">{monthNames[displayMonth]} 목표</h3>
             <p className="text-[10px] text-gray-400">{monthlyGoals.length}개 설정됨</p>
           </div>
         </div>

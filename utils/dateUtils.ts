@@ -38,3 +38,28 @@ export const getTimeDecimal = (timeStr: string): number => {
   const [h, m] = timeStr.split(':').map(Number);
   return h + m / 60;
 };
+
+// 주차에서 가장 높은 월 계산 (연도 경계 처리 포함)
+export const getHighestMonth = (weekDays: Date[]): { month: number; year: number } => {
+  if (weekDays.length === 0) {
+    const now = new Date();
+    return { month: now.getMonth() + 1, year: now.getFullYear() };
+  }
+
+  // 주간의 모든 날짜에서 가장 높은 월 찾기
+  let highestMonth = 0;
+  let highestYear = 0;
+
+  weekDays.forEach(day => {
+    const month = day.getMonth() + 1; // 1-12
+    const year = day.getFullYear();
+
+    // 연도가 더 높거나, 같은 연도에서 월이 더 높은 경우
+    if (year > highestYear || (year === highestYear && month > highestMonth)) {
+      highestMonth = month;
+      highestYear = year;
+    }
+  });
+
+  return { month: highestMonth, year: highestYear };
+};
