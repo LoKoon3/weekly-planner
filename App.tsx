@@ -23,6 +23,7 @@ const App: React.FC = () => {
   
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // 일별 상세 뷰 상태
   const [selectedDayForDetail, setSelectedDayForDetail] = useState<Date | null>(null);
@@ -73,10 +74,10 @@ const App: React.FC = () => {
     <div className={`min-h-screen ${settings.theme === 'dark' ? 'dark' : ''}`}>
       <div className="flex h-screen bg-gray-50 dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100 overflow-hidden">
         
-        {/* Sidebar */}
+        {/* Desktop Sidebar */}
         <aside className={`
-          ${isSidebarOpen ? 'w-80' : 'w-0'} 
-          transition-all duration-300 ease-in-out border-r dark:border-gray-800 bg-white dark:bg-gray-900 
+          ${isSidebarOpen ? 'w-80' : 'w-0'}
+          transition-all duration-300 ease-in-out border-r dark:border-gray-800 bg-white dark:bg-gray-900
           hidden lg:flex flex-col p-6 overflow-hidden shrink-0
         `}>
           <div className="flex items-center gap-3 mb-10">
@@ -87,11 +88,11 @@ const App: React.FC = () => {
             </div>
             <h1 className="text-xl font-black tracking-tight">주간 플래너</h1>
           </div>
-          
+
           <GoalPanel />
 
           <div className="mt-auto space-y-4">
-            <button 
+            <button
               onClick={() => setTheme(settings.theme === 'light' ? 'dark' : 'light')}
               className="w-full flex items-center justify-center gap-2 py-3 border dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
@@ -103,12 +104,79 @@ const App: React.FC = () => {
           </div>
         </aside>
 
+        {/* Mobile Sidebar Overlay */}
+        <div
+          className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${
+            isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+
+          {/* Sidebar Panel */}
+          <aside
+            className={`absolute top-0 left-0 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-2xl flex flex-col p-5 transform transition-transform duration-300 ease-out ${
+              isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h1 className="text-lg font-black tracking-tight">주간 플래너</h1>
+              </div>
+              <button
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Goal Panel */}
+            <div className="flex-1 overflow-y-auto">
+              <GoalPanel />
+            </div>
+
+            {/* Footer */}
+            <div className="mt-4 pt-4 border-t dark:border-gray-800 space-y-3">
+              <button
+                onClick={() => setTheme(settings.theme === 'light' ? 'dark' : 'light')}
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm border dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                {settings.theme === 'light' ? '🌙 다크 모드' : '☀️ 라이트 모드'}
+              </button>
+              <div className="text-[9px] text-gray-400 text-center font-bold tracking-widest uppercase">
+                © 2025 Weekly Planner Pro
+              </div>
+            </div>
+          </aside>
+        </div>
+
         {/* Main Content */}
         <main className="flex-1 flex flex-col min-w-0">
           {/* Top Navbar - Mobile Optimized */}
           <header className="min-h-[56px] sm:h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b dark:border-gray-800 px-3 sm:px-6 py-2 sm:py-0 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 z-30 gap-2 sm:gap-0">
             {/* Top Row: Title + Navigation */}
             <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4">
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMobileSidebarOpen(true)}
+                className="lg:hidden p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+              </button>
+
+              {/* Desktop Sidebar Toggle */}
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 className="hidden lg:flex p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
